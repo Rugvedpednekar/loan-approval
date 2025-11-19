@@ -4,7 +4,7 @@ import pandas as pd
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)  # allow calls from your frontend in dev
+CORS(app)  # allow calls from your frontend / GitHub Pages
 
 # =========================
 # LOAD MODEL BUNDLE
@@ -25,6 +25,15 @@ print(f"   → Numeric features   : {numeric_features}")
 print(f"   → Categorical features: {categorical_features}")
 
 
+@app.route("/", methods=["GET"])
+def home():
+    return jsonify({
+        "message": "Loan Approval API is running.",
+        "endpoints": ["/health", "/model-info", "/predict (POST)"],
+        "model_used": best_model_name,
+    }), 200
+
+
 @app.route("/health", methods=["GET"])
 def health():
     return jsonify({"status": "ok"}), 200
@@ -32,9 +41,6 @@ def health():
 
 @app.route("/model-info", methods=["GET"])
 def model_info():
-    """
-    Endpoint to inspect which model is in use and its validation metrics.
-    """
     return jsonify(
         {
             "best_model_name": best_model_name,
@@ -48,22 +54,6 @@ def model_info():
 
 @app.route("/predict", methods=["POST"])
 def predict():
-    """
-    Expect JSON like:
-    {
-      "ApplicantIncome": 5000,
-      "CoapplicantIncome": 2000,
-      "LoanAmount": 150,
-      "Loan_Amount_Term": 360,
-      "Gender": "Male",
-      "Married": "Yes",
-      "Dependents": "1",
-      "Education": "Graduate",
-      "Self_Employed": "No",
-      "Credit_History": "1.0",
-      "Property_Area": "Urban"
-    }
-    """
     data = request.get_json()
 
     try:
@@ -74,18 +64,15 @@ def predict():
             val = data.get(col)
             row[col] = float(val) if val not in [None, ""] else None
 
-        # categorical features -> string (can be None)
+        # categorical features -> string
         for col in categorical_features:
             row[col] = data.get(col)
 
-        # Create single-row DataFrame
         X_input = pd.DataFrame([row])
 
-        # Predict with the loaded pipeline
         pred = pipeline.predict(X_input)[0]
         proba = pipeline.predict_proba(X_input)[0, 1]
 
-        # Debug log
         print("DEBUG row:", row, "→ predicted:", pred, "probability:", proba)
 
         return jsonify(
