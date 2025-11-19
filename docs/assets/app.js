@@ -7,7 +7,7 @@ const resultText = document.getElementById("result-text");
 const resultProb = document.getElementById("result-prob");
 
 // Backend URL
-const API_BASE = "https://loan-approval-cxds.onrender.com";
+const API_BASE = "https://loan-approval-8qls.onrender.com";
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -67,4 +67,5 @@ form.addEventListener("submit", async (e) => {
     statusEl.textContent = "❌ Error: Could not connect to backend.";
   }
 });
+
 
