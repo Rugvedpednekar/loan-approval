@@ -1,10 +1,11 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 import joblib
 import pandas as pd
 from flask_cors import CORS
 
-app = Flask(__name__)
-CORS(app)  # allow calls from your frontend / GitHub Pages
+# Tell Flask where templates and static files live
+app = Flask(__name__, static_folder="static", template_folder="templates")
+CORS(app)
 
 # =========================
 # LOAD MODEL BUNDLE
@@ -25,14 +26,15 @@ print(f"   → Numeric features   : {numeric_features}")
 print(f"   → Categorical features: {categorical_features}")
 
 
+# ========== FRONTEND ==========
+
 @app.route("/", methods=["GET"])
 def home():
-    return jsonify({
-        "message": "Loan Approval API is running.",
-        "endpoints": ["/health", "/model-info", "/predict (POST)"],
-        "model_used": best_model_name,
-    }), 200
+    # This will render backend/templates/index.html
+    return render_template("index.html")
 
+
+# ========== API ENDPOINTS ==========
 
 @app.route("/health", methods=["GET"])
 def health():
